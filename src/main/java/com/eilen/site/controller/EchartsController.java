@@ -7,7 +7,6 @@ import cn.hutool.core.lang.TypeReference;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.eilen.site.common.Constants;
 import com.eilen.site.common.Result;
 import com.eilen.site.config.AuthAccess;
 import com.eilen.site.entity.Files;
@@ -16,6 +15,7 @@ import com.eilen.site.mapper.FileMapper;
 import com.eilen.site.service.IUserService;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,6 +36,9 @@ public class EchartsController {
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+
+    @Value("${files.upload.host}")
+    private String Host;
 
     @GetMapping("/members")
     public Result member() {
@@ -84,6 +87,11 @@ public class EchartsController {
             // 5. 如果有, 从redis缓存中获取数据
             files = JSONUtil.toBean(jsonStr, new TypeReference<List<Files>>() {
             }, true);
+        }
+        for (Files f : files) {
+            if (f != null || f.getUrl() != null || !f.getUrl().equals("")) {
+                f.setUrl(Host + f.getUrl());
+            }
         }
         return Result.success(files);
     }

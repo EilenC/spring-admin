@@ -23,6 +23,7 @@ import com.eilen.site.service.IUserService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.eilen.site.utils.TokenUtils;
 import jakarta.annotation.Resource;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -52,6 +53,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Resource
     private IMenuService menuService;
+
+    @Value("${files.upload.host}")
+    private String Host;
 
     @Override
     public UserDTO login(UserDTO userDTO) {
@@ -101,14 +105,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
             qw.like("address", address);
         }
         IPage<User> list = userMapper.selectPage(page, qw);
-        List<User> users = new ArrayList<>();
 
         for (User user : list.getRecords()) {
+            if ( user != null || user.getAvatarUrl() != null || !user.getAvatarUrl().equals(""))
+            {
+                user.setAvatarUrl(Host+user.getAvatarUrl());
+            }
             if (user.getRole() != null && !user.getRole().equals("")) {
                 QueryWrapper<Role> qwo = new QueryWrapper<>();
                 String na = roleMapper.selectOne(qwo.eq("flag", user.getRole())).getName();
                 user.setRoleName(na);
-                users.add(user);
             }
         }
         return list;

@@ -5,9 +5,12 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.eilen.site.common.Result;
 import com.eilen.site.entity.Files;
+import com.eilen.site.entity.Role;
+import com.eilen.site.entity.User;
 import com.eilen.site.mapper.FileMapper;
 import jakarta.annotation.Resource;
 import jakarta.servlet.ServletOutputStream;
@@ -63,13 +66,14 @@ public class FileController {
         String md5 = SecureUtil.md5(file.getInputStream());
         // 从数据库查询是否存在相同的记录
         Files dbFiles = getFileByMd5(md5);
+        String suffixPath = "/file/" + fileUUID;
         if (dbFiles != null) { // 文件已存在
             url = dbFiles.getUrl();
         } else {
             // 上传文件到磁盘
             file.transferTo(uploadFile);
             // 数据库若不存在重复文件，则不删除刚才上传的文件
-            url = Host + "/file/" + fileUUID;
+            url = suffixPath;
         }
 
         // 存储数据库
@@ -77,11 +81,11 @@ public class FileController {
         saveFile.setName(originalFilename);
         saveFile.setType(type);
         saveFile.setSize(size / 1024);
-        saveFile.setUrl(url);
+        saveFile.setUrl(suffixPath);
         saveFile.setMd5(md5);
         fileMapper.insert(saveFile);
 
-        return url;
+        return Host + url;
     }
 
     /**
@@ -93,6 +97,7 @@ public class FileController {
      */
     @GetMapping("/{fileUUID}")
     public void download(@PathVariable String fileUUID, HttpServletResponse response) throws IOException {
+        System.out.println(fileUploadPath+fileUUID);
         // 根据文件的唯一标识码获取文件
         File uploadFile = new File(fileUploadPath + fileUUID);
         // 设置输出流的格式
@@ -167,6 +172,13 @@ public class FileController {
         if (!"".equals(name)) {
             queryWrapper.like("name", name);
         }
-        return Result.success(fileMapper.selectPage(new Page<>(pageNum, pageSize), queryWrapper));
+        IPage<Files> list = fileMapper.selectPage(new Page<>(pageNum, pageSize), queryWrapper);
+
+        for (Files f : list.getRecords()) {
+            if (f != null || f.getUrl() != null || !f.getUrl().equals("")) {
+                f.setUrl(Host + f.getUrl());
+            }
+        }
+        return Result.success(list);
     }
 }

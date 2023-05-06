@@ -51,6 +51,9 @@ public class UserController {
     @Autowired
     private IUserService userService;
 
+    @Value("${files.upload.host}")
+    private String Host;
+
     @PostMapping("/login")
     public Result login(@RequestBody UserDTO userDTO) {
         String username = userDTO.getUsername();
@@ -77,6 +80,10 @@ public class UserController {
         if (user.getId() == null || user.getId() == 0) {
             user.setPassword(SecureUtil.md5("123"));
         }
+        if (user.getAvatarUrl() != null || !user.getAvatarUrl().equals("")) {
+            String newAvatarUrl = user.getAvatarUrl();
+            user.setAvatarUrl(newAvatarUrl.replace(Host, ""));
+        }
         return Result.success(userService.saveOrUpdate(user));
     }
 
@@ -97,7 +104,9 @@ public class UserController {
     public Result getByUserName(@PathVariable String username) {
         QueryWrapper<User> qw = new QueryWrapper<>();
         qw.eq("username", username);
-        return Result.success(userService.getOne(qw));
+        User user = userService.getOne(qw);
+        user.setAvatarUrl(Host+user.getAvatarUrl());
+        return Result.success(user);
     }
 
     @DeleteMapping("/{id}")
