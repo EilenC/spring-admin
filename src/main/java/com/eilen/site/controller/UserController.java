@@ -3,38 +3,29 @@ package com.eilen.site.controller;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
-import cn.hutool.http.server.HttpServerResponse;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.eilen.site.common.Constants;
 import com.eilen.site.common.Result;
 import com.eilen.site.controller.dto.UserDTO;
 import com.eilen.site.controller.dto.UserPasswordDTO;
+import com.eilen.site.entity.User;
+import com.eilen.site.service.IUserService;
 import com.eilen.site.utils.TokenUtils;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.beans.factory.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-
-import com.eilen.site.service.IUserService;
-import com.eilen.site.entity.User;
-
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 /**
  * <p>
@@ -105,7 +96,7 @@ public class UserController {
         QueryWrapper<User> qw = new QueryWrapper<>();
         qw.eq("username", username);
         User user = userService.getOne(qw);
-        user.setAvatarUrl(Host+user.getAvatarUrl());
+        user.setAvatarUrl(Host + user.getAvatarUrl());
         return Result.success(user);
     }
 

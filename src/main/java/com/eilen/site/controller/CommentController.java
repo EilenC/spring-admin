@@ -35,6 +35,9 @@ public class CommentController {
     @Autowired
     private ICommentService commentService;
 
+    @Value("${files.upload.host}")
+    private String Host;
+
     @PostMapping
     public Result save(@RequestBody Comment comment) {
         if (comment.getId() == null) { // 新增评论
@@ -73,6 +76,12 @@ public class CommentController {
     @GetMapping("/tree/{articleId}")
     public Result findTree(@PathVariable Integer articleId) {
         List<Comment> articleComments = commentService.findCommentDetail(articleId);  // 查询所有的评论和回复数据
+        for (Comment articleComment : articleComments) {
+            if (articleComment.getAvatarUrl() != null || !articleComment.getAvatarUrl().equals("")) {
+                String newAvatarUrl = articleComment.getAvatarUrl();
+                articleComment.setAvatarUrl(newAvatarUrl.replace(Host, ""));
+            }
+        }
         // 查询评论数据（不包括回复）
         List<Comment> originList = articleComments.stream().filter(comment -> comment.getOriginId() == null).collect(Collectors.toList());
 
