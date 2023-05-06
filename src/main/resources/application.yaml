@@ -1,12 +1,19 @@
 spring:
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/learnjava?serverTimezone=GMT%2b8
     username: root
     password: root
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
 server:
   port: 9090
-
 mybatis:
   mapper-locations: classpath:mapper/*.xml
 #  configuration:
@@ -18,4 +25,6 @@ mybatis-plus:
 files:
   upload:
     path: E:/files/
-#    path: /home/files/
+#    path: /data/wwwroot/spring.eilen.top/files/
+#    host: http://159.75.104.101:9090
+    host: http://localhost:9090

@@ -74,10 +74,9 @@ public class UserController {
 
     @PostMapping
     public Result save(@RequestBody User user) {
-        if (user.getPassword().equals("")) {
-            return Result.error(Constants.CODE_400, "请设置密码");
+        if (user.getId() == null || user.getId() == 0) {
+            user.setPassword(SecureUtil.md5("123"));
         }
-        user.setPassword(SecureUtil.md5(user.getPassword()));
         return Result.success(userService.saveOrUpdate(user));
     }
 
@@ -89,8 +88,8 @@ public class UserController {
         String msg = userService.updatePassword(user);
         if (msg.equals("")) {
             return Result.success();
-        }else{
-            return Result.error(Constants.CODE_400,msg);
+        } else {
+            return Result.error(Constants.CODE_400, msg);
         }
     }
 
