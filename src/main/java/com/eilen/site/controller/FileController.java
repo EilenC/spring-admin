@@ -66,14 +66,13 @@ public class FileController {
         String md5 = SecureUtil.md5(file.getInputStream());
         // 从数据库查询是否存在相同的记录
         Files dbFiles = getFileByMd5(md5);
-        String suffixPath = "/file/" + fileUUID;
         if (dbFiles != null) { // 文件已存在
             url = dbFiles.getUrl();
         } else {
             // 上传文件到磁盘
             file.transferTo(uploadFile);
             // 数据库若不存在重复文件，则不删除刚才上传的文件
-            url = suffixPath;
+            url = "/file/" + fileUUID;
         }
 
         // 存储数据库
@@ -81,7 +80,7 @@ public class FileController {
         saveFile.setName(originalFilename);
         saveFile.setType(type);
         saveFile.setSize(size / 1024);
-        saveFile.setUrl(suffixPath);
+        saveFile.setUrl(url);
         saveFile.setMd5(md5);
         fileMapper.insert(saveFile);
 
@@ -97,7 +96,6 @@ public class FileController {
      */
     @GetMapping("/{fileUUID}")
     public void download(@PathVariable String fileUUID, HttpServletResponse response) throws IOException {
-        System.out.println(fileUploadPath+fileUUID);
         // 根据文件的唯一标识码获取文件
         File uploadFile = new File(fileUploadPath + fileUUID);
         // 设置输出流的格式
