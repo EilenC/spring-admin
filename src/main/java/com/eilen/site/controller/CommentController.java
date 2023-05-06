@@ -78,8 +78,7 @@ public class CommentController {
         List<Comment> articleComments = commentService.findCommentDetail(articleId);  // 查询所有的评论和回复数据
         for (Comment articleComment : articleComments) {
             if (articleComment.getAvatarUrl() != null || !articleComment.getAvatarUrl().equals("")) {
-                String newAvatarUrl = articleComment.getAvatarUrl();
-                articleComment.setAvatarUrl(newAvatarUrl.replace(Host, ""));
+                articleComment.setAvatarUrl(Host+articleComment.getAvatarUrl());
             }
         }
         // 查询评论数据（不包括回复）
